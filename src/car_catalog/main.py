@@ -1,89 +1,94 @@
-from car_catalog.models import Car
-from car_catalog.data import INITIAL_CARS, CATALOG_METADATA
-from car_catalog.processors import (
-    get_unique_makes,
-    create_car_index,
-    group_cars_by_make,
-    count_cars_by_make,
-)
-from car_catalog.analytics import (
-    calculate_average_price,
-    find_most_expensive_car,
-    find_lowest_mileage_car,
-    sort_cars_by_price,
-    calculate_average_prices_custom,
-    create_car_record,
-    create_year_filter,
-)
+import sys
+import csv
+import time
+import tracemalloc
+from pathlib import Path
+from itertools import islice
 
-from time import perf_counter
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def run_benchmark() -> None:
-    """Benchmark comparing List search O(n) vs Dict lookup O(1)."""
-    print("\n" + "-" * 65)
-    print("EXPERIMENTAL PART: BENCHMARK")
-    print("-" * 65)
+from car_catalog.models import CarLimitIterator
+from car_catalog.pipeline import build_car_pipeline
+from car_catalog.analytics import calculate_streaming_metrics, group_cars_by_brand_stream
 
-    sizes = [1000, 10000, 100000]
-    print(f"{'Record Count':<18} | {'List Search (sec)':<20} | {'Dict Search (sec)':<20}")
-    print("-" * 65)
 
-    for n in sizes:
-        test_cars = [Car("Make", f"Model_{i}", 2020, 10000.0, 50000) for i in range(n)]
-        target_id = n - 1
+def run_benchmark_on_file(csv_file_path: str) -> None:
+    print("\nPERFORMANCE BENCHMARK ON EXISTING DATASET: EAGER VS LAZY")
 
-        start = perf_counter()
-        _ = next((c for c in test_cars if c.model == f"Model_{target_id}"), None)
-        list_time = perf_counter() - start
+    tracemalloc.start()
+    t_start = time.perf_counter()
+    
+    lazy_pipeline = build_car_pipeline(csv_file_path, min_year=0)
+    lazy_count = sum(1 for _ in lazy_pipeline)
+    
+    lazy_time = time.perf_counter() - t_start
+    _, lazy_peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
 
-        car_dict = {f"Model_{i}": c for i, c in enumerate(test_cars)}
-        start = perf_counter()
-        _ = car_dict.get(f"Model_{target_id}")
-        dict_time = perf_counter() - start
+    tracemalloc.start()
+    t_start = time.perf_counter()
+    
+    with open(csv_file_path, "r", encoding="utf-8") as f:
+        eager_data = list(csv.DictReader(f))
+    eager_count = len(eager_data)
+    
+    eager_time = time.perf_counter() - t_start
+    _, eager_peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
 
-        print(f"{n:<18} | {list_time:<20.8f} | {dict_time:<20.8f}")
+    eager_mem_kb = eager_peak_mem / 1024
+    lazy_mem_kb = lazy_peak_mem / 1024
+    mem_ratio = eager_peak_mem / (lazy_peak_mem if lazy_peak_mem > 0 else 1)
+
+    header = f"{'Total Records':<15} | {'Eager Time (s)':<15} | {'Lazy Time (s)':<15} | {'Eager Mem (KB)':<15} | {'Lazy Mem (KB)':<15} | {'Gain'}"
+    print(header)
+    print("-" * len(header))
+    print(
+        f"{lazy_count:<15} | "
+        f"{eager_time:<15.4f} | "
+        f"{lazy_time:<15.4f} | "
+        f"{eager_mem_kb:<15.1f} | "
+        f"{lazy_mem_kb:<15.1f} | "
+        f"{mem_ratio:.1f}x"
+    )
+
 
 def main() -> None:
-    print(f"--- {CATALOG_METADATA[0]} ({CATALOG_METADATA[1]}) ---")
-    cars = INITIAL_CARS.copy()
+    csv_file = "data/cars_large.csv"
 
-    print("\n1. All Cars:")
-    for car in cars:
-        print(f" - {car.full_title}: ${car.price:.2f}, {car.mileage} km")
+    sample_brands = ["Volvo", "BMW", "Nissan"]
+    brand_iter = iter(sample_brands)
+    print("Demo iter()/next():", next(brand_iter), next(brand_iter), next(brand_iter))
 
-    print("\n2. Unique Makes (set):", get_unique_makes(cars))
+    pipeline = build_car_pipeline(csv_file, min_year=0)
+    avg_price, max_car, min_car = calculate_streaming_metrics(pipeline)
+    
+    print(f"\nAverage price: ${avg_price:.2f}")
+    if max_car:
+        print(f"Most expensive car: {max_car.full_title} (${max_car.price:.2f})")
+    if min_car:
+        print(f"Lowest mileage car: {min_car.full_title} ({min_car.mileage} km)")
 
-    avg_price = calculate_average_price(cars)
-    print(f"\n3. Average Price: ${avg_price:.2f}")
+    p_islice = build_car_pipeline(csv_file, min_year=0)
+    first_3 = list(islice(p_islice, 3))
+    
+    print("\nFirst 3 cars (via itertools.islice):")
+    for car in first_3:
+        print(f" - {car.full_title} (${car.price:.2f})")
 
-    best_car = find_most_expensive_car(cars)
-    if best_car:
-        print(f"   Most expensive car: {best_car.full_title} (${best_car.price:.2f})")
+    custom_iter = CarLimitIterator(first_3, limit=2)
+    print("\nCustom Iterator output (limit=2):")
+    for car in custom_iter:
+        print(f" [CustomIter] - {car.full_title}")
 
-    min_mileage_car = find_lowest_mileage_car(cars)
-    if min_mileage_car:
-        print(f"   Lowest mileage car: {min_mileage_car.full_title} ({min_mileage_car.mileage} km)")
+    p_batch = build_car_pipeline(csv_file, min_year=0)
+    first_batch = list(islice(p_batch, 5))
+    print(f"\nFirst batch size: {len(first_batch)} items")
 
-    print("\n4. Sorted by price (descending):")
-    for car in sort_cars_by_price(cars):
-        print(f" - {car.full_title}: ${car.price:.2f}")
+    grouped = group_cars_by_brand_stream(first_3)
+    print("\nBrand distribution in selected sample:", {k: len(v) for k, v in grouped.items()})
 
-    print("\n5. Car count by make (Counter):", dict(count_cars_by_make(cars)))
-    print("   Grouped cars by make (defaultdict):")
-    for make, group in group_cars_by_make(cars).items():
-        print(f"   * {make}: {len(group)} items")
-
-    index = create_car_index(cars)
-    print("\n6. Search by ID (Dict Index) [ID=2]:", index.get(2))
-
-    filter_2020_plus = create_year_filter(2020)
-    newer_cars = [c for c in cars if filter_2020_plus(c)]
-    print(f"\n7. Cars from 2020+ (Closure & List Comprehension): {len(newer_cars)} items")
-
-    print("\n8. Demo *args:", calculate_average_prices_custom(10000.0, 20000.0, 30000.0))
-    print("   Demo **kwargs:", create_car_record(make="Tesla", model="Model 3", year=2023, price=45000.0))
-
-    run_benchmark()
+    run_benchmark_on_file(csv_file)
 
 if __name__ == "__main__":
     main()

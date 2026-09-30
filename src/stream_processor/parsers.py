@@ -1,5 +1,5 @@
 from typing import Generator, Dict
-from car_catalog.models import Car
+from src.stream_processor.models import Car
 
 def parse_car_stream(raw_stream: Generator[Dict[str, str], None, None]) -> Generator[Car, None, None]:
     """Validate and convert raw dict stream into Car objects."""

@@ -1,4 +1,4 @@
-from car_catalog.models import Car
+from src.car_catalog.models import Car
 
 CATALOG_METADATA: tuple[str, str, int] = ("Car Catalog System", "v2.0", 2026)
 

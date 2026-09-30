@@ -1,5 +1,5 @@
 from collections import defaultdict, Counter
-from car_catalog.models import Car
+from src.car_catalog.models import Car
 
 def get_unique_makes(cars: list[Car]) -> set[str]:
     """Set Comprehension for unique car makes."""

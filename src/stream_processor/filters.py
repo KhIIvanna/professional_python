@@ -1,5 +1,5 @@
 from typing import Generator
-from car_catalog.models import Car
+from src.car_catalog.models import Car
 
 def filter_by_make(cars_stream: Generator[Car, None, None], make: str) -> Generator[Car, None, None]:
     """Filter cars stream by make."""

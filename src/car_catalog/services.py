@@ -1,4 +1,4 @@
-from car_catalog.models import Car
+from src.car_catalog.models import Car
 
 def add_car(cars: list[Car], car: Car) -> None:
     cars.append(car)

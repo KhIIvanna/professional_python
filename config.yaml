@@ -1,0 +1,29 @@
+# ==========================================
+# Reliable Importer Configuration
+# ==========================================
+
+# Ключі верхнього рівня
+input_file: "data/input_vehicles.csv"
+output_file: "output/processed_vehicles.json"
+log_file: "logs/app.log"
+skip_invalid: true
+
+# Вкладені секції
+paths:
+  input_csv: "data/input_vehicles.csv"
+  output_json: "output/processed_vehicles.json"
+  log_file: "logs/app.log"
+
+settings:
+  environment: "development"
+  debug: true
+
+processing:
+  mode: "tolerant"
+  skip_invalid: true
+
+validation:
+  min_year: 1900
+  max_year: 2026
+  min_price: 0.0
+  min_mileage: 0

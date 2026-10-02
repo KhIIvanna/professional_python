@@ -1,0 +1,19 @@
+[2026-10-02 12:13:25,466] [INFO] ==================================================
+[2026-10-02 12:13:25,467] [INFO] Starting Reliable Importer Pipeline (Integration with Lab 1)
+[2026-10-02 12:13:25,467] [INFO] Started operation: 'Full Catalog Import Cycle'
+[2026-10-02 12:13:25,467] [WARNING] Row 5: Release year 1850 is out of allowed range [1900, 2026]
+[2026-10-02 12:13:25,468] [WARNING] Row 7: Fields 'make' and 'model' cannot be empty
+[2026-10-02 12:13:25,469] [INFO] Finished operation: 'Full Catalog Import Cycle' in 0.0024 seconds
+[2026-10-02 12:13:25,469] [INFO] ==================================================
+[2026-10-02 12:13:25,469] [INFO] Processing Statistics:
+[2026-10-02 12:13:25,470] [INFO] Total Rows Processed: 6
+[2026-10-02 12:13:25,470] [INFO] Successfully Validated: 4
+[2026-10-02 12:13:25,470] [INFO] Invalid Records: 2
+[2026-10-02 12:13:25,470] [INFO] Exported Records: 4
+[2026-10-02 12:13:25,470] [INFO] Success Rate: 66.67%
+[2026-10-02 12:13:25,470] [INFO] ==================================================
+[2026-10-02 12:13:25,471] [INFO] Analytics (Invoking Lab 1 car_catalog Services):
+[2026-10-02 12:13:25,471] [INFO] Average Car Price: $31875.00
+[2026-10-02 12:13:25,471] [INFO] Most Expensive: BMW X5 (2022) - $55000.0
+[2026-10-02 12:13:25,471] [INFO] Lowest Mileage: BMW X5 (2022) - 15000 km
+[2026-10-02 12:13:25,471] [INFO] ==================================================

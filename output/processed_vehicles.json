@@ -1,0 +1,34 @@
+[
+    {
+        "make": "Toyota",
+        "model": "Camry",
+        "year": 2020,
+        "price": 22000.0,
+        "mileage": 45000,
+        "full_title": "Toyota Camry (2020)"
+    },
+    {
+        "make": "Honda",
+        "model": "Civic",
+        "year": 2019,
+        "price": 18500.0,
+        "mileage": 60000,
+        "full_title": "Honda Civic (2019)"
+    },
+    {
+        "make": "BMW",
+        "model": "X5",
+        "year": 2022,
+        "price": 55000.0,
+        "mileage": 15000,
+        "full_title": "BMW X5 (2022)"
+    },
+    {
+        "make": "Ford",
+        "model": "Mustang",
+        "year": 2021,
+        "price": 32000.0,
+        "mileage": 25000,
+        "full_title": "Ford Mustang (2021)"
+    }
+]

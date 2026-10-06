@@ -3,8 +3,9 @@ from src.car_catalog.database import engine, Base, SessionLocal
 from src.car_catalog.repositories import ManufacturerRepository, CarRepository
 from src.car_catalog.models import Car
 from src.car_catalog import services
+from fastapi import FastAPI
 
-
+app = FastAPI()
 def run_db_api_parameterized_query(db_path: str = "cars.db") -> None:
     print("\n--- DB-API Parameterized Query Demo ---")
     conn = sqlite3.connect(db_path)

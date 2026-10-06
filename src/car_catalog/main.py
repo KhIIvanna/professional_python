@@ -1,35 +1,60 @@
+import sqlite3
+from src.car_catalog.database import engine, Base, SessionLocal
+from src.car_catalog.repositories import ManufacturerRepository, CarRepository
 from src.car_catalog.models import Car
-from src.car_catalog.services import (
-    add_car,
-    search_by_make,
-    filter_by_year,
-    find_most_expensive_car,
-    calculate_average_price,
-    find_lowest_mileage_car,
-)
+from src.car_catalog import services
+
+
+def run_db_api_parameterized_query(db_path: str = "cars.db") -> None:
+    print("\n--- DB-API Parameterized Query Demo ---")
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    search_make = "Toyota"
+    query = "SELECT id, make, model, year, price FROM cars WHERE make = ?;"
+    cursor.execute(query, (search_make,))
+    
+    rows = cursor.fetchall()
+    print(f"Direct DB-API query result for make='{search_make}':")
+    for row in rows:
+        print(f"ID: {row[0]}, {row[1]} {row[2]}, Year: {row[3]}, Price: ${row[4]}")
+    
+    conn.close()
+
 
 def main() -> None:
-    cars: list[Car] = [
-        Car("Toyota", "Camry", 2019, 21000.0, 75000),
-        Car("BMW", "X5", 2021, 55000.0, 30000),
-        Car("Toyota", "RAV4", 2022, 32000.0, 15000),
-        Car("Audi", "A6", 2018, 23000.0, 110000),
-    ]
+    Base.metadata.create_all(bind=engine)
+    session = SessionLocal()
 
-    print("--- All Cars in Catalog ---")
-    for car in cars:
-        print(f"{car.full_title} - ${car.price:.2f}, mileage: {car.mileage} km")
+    try:
+        m_repo = ManufacturerRepository(session)
+        c_repo = CarRepository(session)
 
-    avg_price = calculate_average_price(cars)
-    print(f"\nAverage car price: ${avg_price:.2f}")
+        toyota_m = m_repo.get_by_name("Toyota") or m_repo.create("Toyota")
 
-    most_expensive = find_most_expensive_car(cars)
-    if most_expensive:
-        print(f"Most expensive car: {most_expensive.full_title} (${most_expensive.price:.2f})")
+        if not c_repo.list_all():
+            c_repo.create("Toyota", "Camry", 2021, 25000.0, 30000, toyota_m.id)
+            c_repo.create("Toyota", "Corolla", 2019, 17000.0, 50000, toyota_m.id)
 
-    lowest_mileage = find_lowest_mileage_car(cars)
-    if lowest_mileage:
-        print(f"Lowest mileage car: {lowest_mileage.full_title} ({lowest_mileage.mileage} km)")
+        # Using your existing memory-based services with dataclasses
+        db_cars = c_repo.list_all()
+        dataclass_cars = [
+            Car(make=c.make, model=c.model, year=c.year, price=c.price, mileage=c.mileage)
+            for c in db_cars
+        ]
+
+        avg_price = services.calculate_average_price(dataclass_cars)
+        most_expensive = services.find_most_expensive_car(dataclass_cars)
+
+        print(f"Average Price from services: ${avg_price:.2f}")
+        if most_expensive:
+            print(f"Most Expensive Car: {most_expensive.full_title}")
+
+    finally:
+        session.close()
+
+    run_db_api_parameterized_query()
+
 
 if __name__ == "__main__":
     main()

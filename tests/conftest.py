@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from application.models import Car
 from application.repositories import InMemoryRepository
 from src.car_catalog.database import Base
+from src.car_catalog.repositories import CarDB, ManufacturerDB  # noqa: F401
 
 
 @pytest.fixture

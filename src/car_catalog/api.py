@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -10,6 +11,7 @@ ManufacturerDB,
 )
 
 from src.car_catalog.schemas import CarCreate, CarResponse, CarUpdate
+from fastapi.responses import RedirectResponse
 
 app = FastAPI(
     title="Car Catalog API",
@@ -80,3 +82,20 @@ async def get_manufacturer_cars(manufacturer_id: int, session: Session = Depends
     cars = repo.list_all()
     filtered_cars = [car for car in cars if car.manufacturer_id == manufacturer_id]
     return filtered_cars
+
+@app.get("/", include_in_schema=False)
+async def redirect_to_docs():
+    return RedirectResponse(url="/docs")
+
+@app.post("/cars/batch", response_model=list[CarResponse], status_code=status.HTTP_200_OK)
+async def get_cars_batch(car_ids: list[int], session: Session = Depends(get_session)):
+    """Асинхронний endpoint для пакетного отримання даних про автомобілі за їх ID."""
+    repo = CarRepository(session)
+    
+    cars = []
+    for car_id in car_ids:
+        car = repo.get_by_id(car_id)
+        if car:
+            cars.append(car)
+            
+    return cars

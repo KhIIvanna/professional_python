@@ -1,12 +1,13 @@
 import asyncio
 import httpx
 
-async def fetch_car_with_retry_and_limit(
+async def fetch_one_car(
     client: httpx.AsyncClient,
     semaphore: asyncio.Semaphore,
     url: str,
     attempts: int = 3,
 ) -> dict:
+    """Отримує дані про один автомобіль з обмеженням паралелізму та retry."""
     async with semaphore:
         for attempt in range(1, attempts + 1):
             try:
@@ -19,12 +20,14 @@ async def fetch_car_with_retry_and_limit(
                 await asyncio.sleep(attempt)
         raise RuntimeError("Unexpected retry state")
 
+
 async def fetch_group_of_cars(base_url: str, car_ids: list[int]) -> list[dict]:
-    semaphore = asyncio.Semaphore(3)  # обмеження паралелізму
+    """Паралельно завантажує групу автомобілів за допомогою asyncio.gather та Task."""
+    semaphore = asyncio.Semaphore(3)  # Обмеження паралелізму (за вимогами)
     async with httpx.AsyncClient(timeout=5.0) as client:
         tasks = [
             asyncio.create_task(
-                fetch_car_with_retry_and_limit(
+                fetch_one_car(
                     client,
                     semaphore,
                     f"{base_url}/cars/{car_id}"

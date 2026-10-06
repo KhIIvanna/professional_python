@@ -24,12 +24,14 @@ class CarDB(Base):
     year: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[float] = mapped_column(Float, nullable=False)
     mileage: Mapped[int] = mapped_column(Integer, nullable=False)
+    
+    vin: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
-    manufacturer_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("manufacturers.id"), nullable=False
+    manufacturer_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("manufacturers.id"), nullable=True
     )
 
-    manufacturer: Mapped["ManufacturerDB"] = relationship(
+    manufacturer: Mapped[Optional["ManufacturerDB"]] = relationship(
         "ManufacturerDB", back_populates="cars"
     )
 
@@ -74,7 +76,8 @@ class CarRepository:
         year: int,
         price: float,
         mileage: int,
-        manufacturer_id: int,
+        manufacturer_id: Optional[int] = None,
+        vin: Optional[str] = None,
     ) -> CarDB:
         car = CarDB(
             make=make,
@@ -83,6 +86,7 @@ class CarRepository:
             price=price,
             mileage=mileage,
             manufacturer_id=manufacturer_id,
+            vin=vin,
         )
         self.session.add(car)
         self.session.commit()

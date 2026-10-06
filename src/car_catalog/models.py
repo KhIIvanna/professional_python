@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 @dataclass(slots=True)
 class Car:
@@ -7,6 +8,8 @@ class Car:
     year: int
     price: float
     mileage: int
+    vin: Optional[str] = None  # <--- додай сюди vin, якщо його там не було
+    manufacturer_id: Optional[int] = None
 
     def __post_init__(self) -> None:
         if self.year < 1886:

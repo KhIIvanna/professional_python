@@ -1,6 +1,12 @@
+from typing import Generator
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+
 from application.models import Car
 from application.repositories import InMemoryRepository
+from src.car_catalog.database import Base
+
 
 @pytest.fixture
 def sample_cars():
@@ -11,9 +17,11 @@ def sample_cars():
         Car(make="Audi", model="A4", year=2020, price=28000.0, mileage=35000),
     ]
 
+
 @pytest.fixture
 def empty_catalog():
     return []
+
 
 @pytest.fixture
 def car_repository(sample_cars):
@@ -21,3 +29,19 @@ def car_repository(sample_cars):
     for idx, car in enumerate(sample_cars):
         repo.add(f"car_{idx}", car)
     return repo
+
+
+@pytest.fixture(scope="function")
+def db_session() -> Generator[Session, None, None]:
+    """Fixture for integration tests using SQLite in-memory database."""
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(bind=engine)
+
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    session = TestingSessionLocal()
+
+    try:
+        yield session
+    finally:
+        session.close()
+        Base.metadata.drop_all(bind=engine)

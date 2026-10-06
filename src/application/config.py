@@ -1,12 +1,15 @@
 import os
-from dataclasses import dataclass
 
-@dataclass
-class AppConfig:
-    max_capacity: int
-    environment: str
+class Config:
+    MIN_YEAR = int(os.getenv("MIN_YEAR", "1900"))
+    MAX_PRICE = float(os.getenv("MAX_PRICE", "1000000.0"))
 
-def get_config() -> AppConfig:
-    max_cap = int(os.getenv("MAX_CAPACITY", "1000"))
-    env = os.getenv("APP_ENV", "development")
-    return AppConfig(max_capacity=max_cap, environment=env)
+    @classmethod
+    def validate_car(cls, year: int, price: float) -> bool:
+        return cls.MIN_YEAR <= year and price <= cls.MAX_PRICE
+
+# Додаємо аліас AppConfig та функцію get_config для сумісності з __init__.py
+AppConfig = Config
+
+def get_config():
+    return Config()

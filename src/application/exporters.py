@@ -1,7 +1,8 @@
 import csv
+import json
 from pathlib import Path
 from typing import List
-from src.car_catalog.models import Car
+from application.models import Car, InvalidCarDataError
 
 class CSVExporter:
     @staticmethod
@@ -18,13 +19,32 @@ class CSVImporter:
         cars: List[Car] = []
         with open(file_path, mode="r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
-            for row in reader:
-                car = Car(
-                    make=row["make"],
-                    model=row["model"],
-                    year=int(row["year"]),
-                    price=float(row["price"]),
-                    mileage=int(row["mileage"]),
-                )
-                cars.append(car)
+            for row_idx, row in enumerate(reader, start=2):
+                try:
+                    car = Car(
+                        make=row["make"],
+                        model=row["model"],
+                        year=int(row["year"]),
+                        price=float(row["price"]),
+                        mileage=int(row["mileage"]),
+                    )
+                    cars.append(car)
+                except (KeyError, ValueError) as e:
+                    raise InvalidCarDataError(f"Malformed CSV record at line {row_idx}: {e}")
         return cars
+
+class JSONExporter:
+    @staticmethod
+    def export_to_file(cars: List[Car], file_path: Path) -> None:
+        data = [
+            {
+                "make": c.make,
+                "model": c.model,
+                "year": c.year,
+                "price": c.price,
+                "mileage": c.mileage,
+            }
+            for c in cars
+        ]
+        with open(file_path, mode="w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)

@@ -1,76 +1,68 @@
 import pytest
-from unittest.mock import Mock, AsyncMock
-from src.car_catalog.models import Car
-from src.car_catalog.services import (
+from unittest.mock import AsyncMock
+from application.models import CarNotFoundError
+from application.services import (
     search_by_make,
+    search_by_model,
     filter_by_year,
     find_most_expensive_car,
     calculate_average_price,
     find_lowest_mileage_car,
+    fetch_external_car_price,
 )
-from application.services import fetch_external_car_price
 
+def test_search_by_make(sample_cars):
+    results = search_by_make(sample_cars, "Toyota")
+    assert len(results) == 2
 
-def test_search_by_make(sample_car_list):
-    bmws = search_by_make(sample_car_list, "bmw")
-    assert len(bmws) == 2
-    assert all(c.make == "BMW" for c in bmws)
+def test_search_by_model(sample_cars):
+    results = search_by_model(sample_cars, "M3")
+    assert len(results) == 1
+    assert results[0].model == "M3"
 
+def test_filter_by_year(sample_cars):
+    results = filter_by_year(sample_cars, 2020)
+    assert len(results) == 2
 
-def test_filter_by_year(sample_car_list):
-    recent = filter_by_year(sample_car_list, 2020)
-    assert len(recent) == 2
+def test_find_most_expensive_car(sample_cars):
+    car = find_most_expensive_car(sample_cars)
+    assert car.model == "M3"
+    assert car.price == pytest.approx(75000.0)
 
+def test_find_most_expensive_car_empty_raises(empty_catalog):
+    with pytest.raises(CarNotFoundError):
+        find_most_expensive_car(empty_catalog)
 
-def test_find_most_expensive_car(sample_car_list):
-    most_expensive = find_most_expensive_car(sample_car_list)
-    assert most_expensive is not None
-    assert most_expensive.model == "M3"
-    assert most_expensive.price == 70000.0
+def test_calculate_average_price(sample_cars):
+    avg = calculate_average_price(sample_cars)
+    assert avg == pytest.approx(35750.0)
 
+def test_calculate_average_price_empty(empty_catalog):
+    assert calculate_average_price(empty_catalog) == pytest.approx(0.0)
 
-def test_calculate_average_price(sample_car_list):
-    avg = calculate_average_price(sample_car_list)
-    assert avg == pytest.approx(48333.33, rel=1e-3)
+def test_find_lowest_mileage_car(sample_cars):
+    car = find_lowest_mileage_car(sample_cars)
+    assert car.model == "M3"
+    assert car.mileage == 12000
 
-
-def test_calculate_average_price_empty():
-    assert calculate_average_price([]) == 0.0
-
-
-def test_find_lowest_mileage_car(sample_car_list):
-    lowest = find_lowest_mileage_car(sample_car_list)
-    assert lowest is not None
-    assert lowest.mileage == 10000
-
-
-def test_mock_notification():
-    mock_notifier = Mock()
-    mock_notifier.send("New car added")
-    mock_notifier.send.assert_called_once_with("New car added")
-
-
-def test_mock_notification_side_effect():
-    """Вимога методички: перевірка side_effect у Mock"""
-    mock_notifier = Mock()
-    mock_notifier.send.side_effect = RuntimeError("Service unavailable")
-
-    with pytest.raises(RuntimeError, match="Service unavailable"):
-        mock_notifier.send("New car added")
-
+def test_find_lowest_mileage_car_empty_raises(empty_catalog):
+    with pytest.raises(CarNotFoundError):
+        find_lowest_mileage_car(empty_catalog)
 
 @pytest.mark.asyncio
-async def test_async_fetch_external_car_price():
-    price = await fetch_external_car_price("BMW", "X5")
-    assert price == 25000.0
-
+async def test_fetch_external_car_price_async():
+    price = await fetch_external_car_price("Tesla", "Model 3")
+    assert price == pytest.approx(25000.0)
 
 @pytest.mark.asyncio
-async def test_async_mock_external_service():
-    """Вимога методички: використання AsyncMock"""
-    mock_api = AsyncMock()
-    mock_api.get_price.return_value = 50000.0
+async def test_fetch_external_car_price_mock():
+    mock_service = AsyncMock(return_value=32000.0)
+    price = await mock_service("BMW", "X5")
+    assert price == pytest.approx(32000.0)
+    mock_service.assert_called_once_with("BMW", "X5")
 
-    result = await mock_api.get_price("BMW", "X5")
-    assert result == 50000.0
-    mock_api.get_price.assert_awaited_once_with("BMW", "X5")
+@pytest.mark.asyncio
+async def test_fetch_external_car_price_failure():
+    mock_service = AsyncMock(side_effect=ValueError("Service unavailable"))
+    with pytest.raises(ValueError, match="Service unavailable"):
+        await mock_service("BMW", "X5")

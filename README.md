@@ -13,7 +13,6 @@
 - **CI/CD**: Готовий GitHub Actions pipeline (лінтинг, перевірка типів, тести, збірка Docker).
 
 # Структура проєкту
-
 car-catalog/
 ├── .github/
 │   └── workflows/

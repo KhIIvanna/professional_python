@@ -3,13 +3,9 @@ import time
 import tracemalloc
 from itertools import islice
 
+from src.stream_processor.analytics import calculate_streaming_metrics, group_cars_by_brand_stream
 from src.stream_processor.models import CarLimitIterator
 from src.stream_processor.pipeline import build_car_pipeline
-from src.stream_processor.analytics import (
-    calculate_streaming_metrics,
-    group_cars_by_brand_stream,
-)
-
 
 def run_benchmark_on_file(csv_file_path: str) -> None:
     print("\nPERFORMANCE BENCHMARK ON EXISTING DATASET: EAGER VS LAZY")
@@ -29,7 +25,7 @@ def run_benchmark_on_file(csv_file_path: str) -> None:
 
     with open(csv_file_path, "r", encoding="utf-8") as f:
         eager_data = list(csv.DictReader(f))
-    eager_count = len(eager_data)
+    len(eager_data)
 
     eager_time = time.perf_counter() - t_start
     _, eager_peak_mem = tracemalloc.get_traced_memory()
@@ -85,7 +81,10 @@ def main() -> None:
     print(f"\nFirst batch size: {len(first_batch)} items")
 
     grouped = group_cars_by_brand_stream(first_3)
-    print("\nBrand distribution in selected sample:", {k: len(v) for k, v in grouped.items()})
+    print(
+        "\nBrand distribution in selected sample:",
+        {k: len(v) for k, v in grouped.items()},
+    )
 
     run_benchmark_on_file(csv_file)
 

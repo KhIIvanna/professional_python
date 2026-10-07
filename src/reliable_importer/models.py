@@ -1,7 +1,4 @@
 from dataclasses import dataclass, field
-from typing import List
-
-from src.car_catalog.models import Car  
 
 
 @dataclass
@@ -12,7 +9,7 @@ class ProcessingStats:
     valid_records: int = 0
     invalid_records: int = 0
     exported_records: int = 0
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     @property
     def success_rate(self) -> float:

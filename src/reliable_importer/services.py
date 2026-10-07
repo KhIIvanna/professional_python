@@ -1,9 +1,7 @@
 import logging
-from typing import List, Tuple
 
 from src.car_catalog.models import Car
 from src.car_catalog.services import add_car
-
 from src.reliable_importer.config import AppConfig
 from src.reliable_importer.exceptions import DataError, RecordValidationError
 from src.reliable_importer.exporters import export_to_json_atomic
@@ -19,17 +17,15 @@ class ImportService:
         self.config = config
         self.logger = logger
 
-    def process_catalog(self) -> Tuple[List[Car], ProcessingStats]:
+    def process_catalog(self) -> tuple[list[Car], ProcessingStats]:
         """Executes full catalog import, validation, and export pipeline."""
         stats = ProcessingStats()
-        valid_cars: List[Car] = []
+        valid_cars: list[Car] = []
 
         for row_idx, raw_row in stream_csv_rows(self.config.input_file):
             stats.total_records += 1
             try:
-                validated_data = validate_car_raw_data(
-                    raw_row, row_idx, self.config
-                )
+                validated_data = validate_car_raw_data(raw_row, row_idx, self.config)
                 car = Car(**validated_data)
                 add_car(valid_cars, car)
                 stats.valid_records += 1

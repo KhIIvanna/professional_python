@@ -1,15 +1,14 @@
-from contextlib import contextmanager
 import logging
-from pathlib import Path
 import time
-from typing import Generator
+from collections.abc import Generator
+from contextlib import contextmanager
+from pathlib import Path
 
 from src.car_catalog.services import (
     calculate_average_price,
     find_lowest_mileage_car,
     find_most_expensive_car,
 )
-
 from src.reliable_importer.config import load_config
 from src.reliable_importer.exceptions import ApplicationError
 from src.reliable_importer.services import ImportService
@@ -46,9 +45,7 @@ def ExecutionTimer(
         yield
     finally:
         elapsed = time.perf_counter() - start_time
-        logger.info(
-            f"Finished operation: '{operation_name}' in {elapsed:.4f} seconds"
-        )
+        logger.info(f"Finished operation: '{operation_name}' in {elapsed:.4f} seconds")
 
 
 def main() -> None:
@@ -94,7 +91,7 @@ def main() -> None:
 
     except ApplicationError as err:
         print(f"[CRITICAL APPLICATION ERROR]: {err}")
-    except Exception as err:
+    except Exception as err:  # noqa: BLE001
         print(f"[UNEXPECTED ERROR]: {err}")
 
 

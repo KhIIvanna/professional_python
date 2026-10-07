@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass(slots=True)
 class Car:
-    brand: str
+    make: str
     model: str
     year: int
     price: float
@@ -11,7 +11,7 @@ class Car:
 
     @property
     def full_title(self) -> str:
-        return f"{self.brand} {self.model} ({self.year})"
+        return f"{self.make} {self.model} ({self.year})"
 
 
 class CarLimitIterator:
@@ -22,7 +22,7 @@ class CarLimitIterator:
         self._limit = limit
         self._index = 0
 
-    def __iter__(self):
+    def __iter__(self) -> "CarLimitIterator":
         return self
 
     def __next__(self) -> Car:

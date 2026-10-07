@@ -1,12 +1,15 @@
 from fastapi.testclient import TestClient
+
 from src.car_catalog.api import app
 
 client = TestClient(app)
+
 
 def test_get_cars():
     response = client.get("/cars")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
 
 def test_create_and_delete_car():
     response = client.post(
@@ -28,6 +31,7 @@ def test_create_and_delete_car():
     # Видалення створеного авто
     del_response = client.delete(f"/cars/{car_id}")
     assert del_response.status_code == 204
+
 
 def test_invalid_car_data():
     response = client.post(

@@ -1,9 +1,18 @@
 from abc import ABC, abstractmethod
+
 from .value_objects import Price, VehicleSpecification
 
 
 class Vehicle(ABC):
-    def __init__(self, vehicle_id: int, brand: str, model: str, year: int, price: Price, mileage: int) -> None:
+    def __init__(
+        self,
+        vehicle_id: int,
+        brand: str,
+        model: str,
+        year: int,
+        price: Price,
+        mileage: int,
+    ) -> None:
         self.id = vehicle_id
         self.brand = brand
         self.model = model

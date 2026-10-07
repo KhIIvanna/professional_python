@@ -1,17 +1,15 @@
 import itertools
-from typing import Dict, Iterable, List, Optional, Tuple
+from collections.abc import Iterable
 
-# Імпортуємо модель Car з пакету car_catalog
-from src.car_catalog.models import Car
-
+from src.stream_processor.models import Car
 
 def calculate_streaming_metrics(
     cars_stream: Iterable[Car],
-) -> Tuple[float, Optional[Car], Optional[Car]]:
+) -> tuple[float, Car | None, Car | None]:
     total_price = 0.0
     count = 0
-    max_price_car: Optional[Car] = None
-    min_mileage_car: Optional[Car] = None
+    max_price_car: Car | None = None
+    min_mileage_car: Car | None = None
 
     for car in cars_stream:
         total_price += car.price
@@ -26,10 +24,10 @@ def calculate_streaming_metrics(
     return avg_price, max_price_car, min_mileage_car
 
 
-def group_cars_by_brand_stream(cars: List[Car]) -> Dict[str, List[Car]]:
+def group_cars_by_brand_stream(cars: list[Car]) -> dict[str, list[Car]]:
     """Group cars by brand using itertools.groupby after sorting."""
-    sorted_cars = sorted(cars, key=lambda c: c.brand)
+    sorted_cars = sorted(cars, key=lambda c: c.make)
     grouped = {}
-    for brand, group in itertools.groupby(sorted_cars, key=lambda c: c.brand):
-        grouped[brand] = list(group)
+    for make, group in itertools.groupby(sorted_cars, key=lambda c: c.make):
+        grouped[make] = list(group)
     return grouped

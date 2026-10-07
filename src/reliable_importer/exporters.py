@@ -1,12 +1,11 @@
 import json
 from pathlib import Path
-from typing import List
 
 from src.car_catalog.models import Car
 from src.reliable_importer.exceptions import DataExportError
 
 
-def export_to_json_atomic(cars: List[Car], output_path: Path) -> None:
+def export_to_json_atomic(cars: list[Car], output_path: Path) -> None:
     """Writes car list to a JSON file atomically using a temporary file."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     temp_path = output_path.with_suffix(".tmp")
@@ -30,6 +29,4 @@ def export_to_json_atomic(cars: List[Car], output_path: Path) -> None:
     except Exception as err:
         if temp_path.exists():
             temp_path.unlink()
-        raise DataExportError(
-            f"Failed to export car catalog to JSON: {err}"
-        ) from err
+        raise DataExportError(f"Failed to export car catalog to JSON: {err}") from err

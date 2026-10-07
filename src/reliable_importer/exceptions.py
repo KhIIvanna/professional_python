@@ -1,19 +1,13 @@
 class ApplicationError(Exception):
     """Base exception class for all application errors."""
 
-    pass
-
 
 class ConfigurationError(ApplicationError):
     """Raised when configuration loading or validation fails."""
 
-    pass
-
 
 class DataError(ApplicationError):
     """Base exception class for data processing errors."""
-
-    pass
 
 
 class RecordValidationError(DataError):
@@ -27,10 +21,6 @@ class RecordValidationError(DataError):
 class DataImportError(DataError):
     """Raised when critical errors occur during CSV data import."""
 
-    pass
-
 
 class DataExportError(DataError):
     """Raised when atomic file writing or JSON serialization fails."""
-
-    pass

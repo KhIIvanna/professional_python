@@ -1,16 +1,17 @@
-from typing import TypeVar, Generic, List, Optional, Iterator
+from collections.abc import Iterator
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
 
 class InMemoryRepository(Generic[T]):
     def __init__(self) -> None:
-        self._items: List[T] = []
+        self._items: list[T] = []
 
     def add(self, item: T) -> None:
         self._items.append(item)
 
-    def get_all(self) -> List[T]:
+    def get_all(self) -> list[T]:
         return list(self._items)
 
     def __len__(self) -> int:

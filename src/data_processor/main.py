@@ -1,5 +1,6 @@
 from time import perf_counter
 
+from src.car_catalog.models import Car
 from src.data_processor.analytics import (
     calculate_average_price,
     calculate_average_prices_custom,
@@ -10,18 +11,11 @@ from src.data_processor.analytics import (
     sort_cars_by_price,
 )
 from src.data_processor.data import CATALOG_METADATA, INITIAL_CARS
-from src.car_catalog.models import Car
 from src.data_processor.processors import (
     count_cars_by_make,
     create_car_index,
     get_unique_makes,
     group_cars_by_make,
-)
-from src.car_catalog.services import (
-    add_car,
-    filter_by_year,
-    find_most_expensive_car as service_find_most_expensive,
-    search_by_make,
 )
 
 
@@ -32,7 +26,9 @@ def run_benchmark() -> None:
     print("-" * 65)
 
     sizes = [1000, 10000, 100000]
-    print(f"{'Record Count':<18} | {'List Search (sec)':<20} | {'Dict Search (sec)':<20}")
+    print(
+        f"{'Record Count':<18} | {'List Search (sec)':<20} | {'Dict Search (sec)':<20}"
+    )
     print("-" * 65)
 
     for n in sizes:
@@ -70,7 +66,9 @@ def main() -> None:
 
     min_mileage_car = find_lowest_mileage_car(cars)
     if min_mileage_car:
-        print(f"   Lowest mileage car: {min_mileage_car.full_title} ({min_mileage_car.mileage} km)")
+        print(
+            f"   Lowest mileage car: {min_mileage_car.full_title} ({min_mileage_car.mileage} km)"
+        )
 
     print("\n4. Sorted by price (descending):")
     for car in sort_cars_by_price(cars):
@@ -86,10 +84,17 @@ def main() -> None:
 
     filter_2020_plus = create_year_filter(2020)
     newer_cars = [c for c in cars if filter_2020_plus(c)]
-    print(f"\n7. Cars from 2020+ (Closure & List Comprehension): {len(newer_cars)} items")
+    print(
+        f"\n7. Cars from 2020+ (Closure & List Comprehension): {len(newer_cars)} items"
+    )
 
-    print("\n8. Demo *args:", calculate_average_prices_custom(10000.0, 20000.0, 30000.0))
-    print("   Demo **kwargs:", create_car_record(make="Tesla", model="Model 3", year=2023, price=45000.0))
+    print(
+        "\n8. Demo *args:", calculate_average_prices_custom(10000.0, 20000.0, 30000.0)
+    )
+    print(
+        "   Demo **kwargs:",
+        create_car_record(make="Tesla", model="Model 3", year=2023, price=45000.0),
+    )
 
     run_benchmark()
 

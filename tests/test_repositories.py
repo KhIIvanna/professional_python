@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy.orm import Session
-from src.car_catalog.repositories import ManufacturerRepository, CarRepository
+
+from src.car_catalog.repositories import CarRepository, ManufacturerRepository
 
 
 def test_crud_operations(db_session: Session) -> None:

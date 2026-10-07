@@ -1,9 +1,13 @@
 import itertools
-from typing import Generator, List, Iterable, TypeVar
+from collections.abc import Generator, Iterable
+from typing import TypeVar
 
 T = TypeVar("T")
 
-def batch_stream(iterable: Iterable[T], batch_size: int) -> Generator[List[T], None, None]:
+
+def batch_stream(
+    iterable: Iterable[T], batch_size: int
+) -> Generator[list[T], None, None]:
     """Split an iterable stream into chunks of batch_size."""
     iterator = iter(iterable)
     while True:

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
+
 import yaml
 
 from src.reliable_importer.exceptions import ApplicationError
@@ -27,13 +28,15 @@ def load_config(config_path: Path) -> AppConfig:
 
     try:
         with open(config_path, "r", encoding="utf-8") as f:
-            data: Dict[str, Any] = yaml.safe_load(f) or {}
+            data: dict[str, Any] = yaml.safe_load(f) or {}
     except Exception as err:
         raise ApplicationError(f"Failed to parse configuration YAML: {err}") from err
 
     # Зчитуємо шляхи
     input_file_str = data.get("input_file") or data.get("paths", {}).get("input_csv")
-    output_file_str = data.get("output_file") or data.get("paths", {}).get("output_json")
+    output_file_str = data.get("output_file") or data.get("paths", {}).get(
+        "output_json"
+    )
     log_file_str = data.get("log_file") or data.get("paths", {}).get("log_file")
 
     if not input_file_str or not output_file_str or not log_file_str:

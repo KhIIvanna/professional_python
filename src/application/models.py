@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
+
 class InvalidCarDataError(Exception):
     """Кастомне виключення для некоректних даних автомобіля."""
-    pass
+
 
 class CarNotFoundError(Exception):
     """Кастомне виключення, коли авто не знайдено."""
-    pass
+
 
 @dataclass
 class Car:

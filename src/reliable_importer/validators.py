@@ -1,11 +1,12 @@
-from typing import Any, Dict
+from typing import Any
+
 from src.reliable_importer.config import AppConfig
 from src.reliable_importer.exceptions import RecordValidationError
 
 
 def validate_car_raw_data(
-    row: Dict[str, Any], row_idx: int, config: AppConfig
-) -> Dict[str, Any]:
+    row: dict[str, Any], row_idx: int, config: AppConfig
+) -> dict[str, Any]:
     """Validates raw CSV fields against business rules and configuration boundaries."""
     make = str(row.get("make", "")).strip()
     model = str(row.get("model", "")).strip()

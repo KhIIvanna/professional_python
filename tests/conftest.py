@@ -1,7 +1,8 @@
-from typing import Generator
+from collections.abc import Generator
+
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from application.models import Car
 from application.repositories import InMemoryRepository
@@ -35,7 +36,9 @@ def car_repository(sample_cars):
 @pytest.fixture(scope="function")
 def db_session() -> Generator[Session, None, None]:
     """Fixture for integration tests using SQLite in-memory database."""
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    engine = create_engine(
+        "sqlite:///:memory:", connect_args={"check_same_thread": False}
+    )
     Base.metadata.create_all(bind=engine)
 
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -1,6 +1,8 @@
-from typing import List, Optional
-from sqlalchemy import String, Integer, Float, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
+from typing import Optional
+
+from sqlalchemy import Float, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
+
 from src.car_catalog.database import Base
 
 
@@ -10,7 +12,7 @@ class ManufacturerDB(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
 
-    cars: Mapped[List["CarDB"]] = relationship(
+    cars: Mapped[list["CarDB"]] = relationship(
         "CarDB", back_populates="manufacturer", cascade="all, delete-orphan"
     )
 
@@ -24,10 +26,10 @@ class CarDB(Base):
     year: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[float] = mapped_column(Float, nullable=False)
     mileage: Mapped[int] = mapped_column(Integer, nullable=False)
-    
-    vin: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
-    manufacturer_id: Mapped[Optional[int]] = mapped_column(
+    vin: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+    manufacturer_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("manufacturers.id"), nullable=True
     )
 
@@ -47,21 +49,21 @@ class ManufacturerRepository:
         self.session.refresh(manufacturer)
         return manufacturer
 
-    def get_by_id(self, manufacturer_id: int) -> Optional[ManufacturerDB]:
+    def get_by_id(self, manufacturer_id: int) -> ManufacturerDB | None:
         return (
             self.session.query(ManufacturerDB)
             .filter(ManufacturerDB.id == manufacturer_id)
             .first()
         )
 
-    def get_by_name(self, name: str) -> Optional[ManufacturerDB]:
+    def get_by_name(self, name: str) -> ManufacturerDB | None:
         return (
             self.session.query(ManufacturerDB)
             .filter(ManufacturerDB.name == name)
             .first()
         )
 
-    def list_all(self) -> List[ManufacturerDB]:
+    def list_all(self) -> list[ManufacturerDB]:
         return self.session.query(ManufacturerDB).all()
 
 
@@ -76,8 +78,8 @@ class CarRepository:
         year: int,
         price: float,
         mileage: int,
-        manufacturer_id: Optional[int] = None,
-        vin: Optional[str] = None,
+        manufacturer_id: int | None = None,
+        vin: str | None = None,
     ) -> CarDB:
         car = CarDB(
             make=make,
@@ -93,19 +95,19 @@ class CarRepository:
         self.session.refresh(car)
         return car
 
-    def get_by_id(self, car_id: int) -> Optional[CarDB]:
+    def get_by_id(self, car_id: int) -> CarDB | None:
         return self.session.query(CarDB).filter(CarDB.id == car_id).first()
 
-    def list_all(self) -> List[CarDB]:
+    def list_all(self) -> list[CarDB]:
         return self.session.query(CarDB).all()
 
-    def filter_by_make(self, make: str) -> List[CarDB]:
+    def filter_by_make(self, make: str) -> list[CarDB]:
         return self.session.query(CarDB).filter(CarDB.make.ilike(make)).all()
 
-    def filter_by_year(self, min_year: int) -> List[CarDB]:
+    def filter_by_year(self, min_year: int) -> list[CarDB]:
         return self.session.query(CarDB).filter(CarDB.year >= min_year).all()
 
-    def update_price(self, car_id: int, new_price: float) -> Optional[CarDB]:
+    def update_price(self, car_id: int, new_price: float) -> CarDB | None:
         car = self.get_by_id(car_id)
         if car:
             car.price = new_price
@@ -123,7 +125,7 @@ class CarRepository:
 
     def bulk_price_update_with_transaction(
         self, manufacturer_id: int, discount_percent: float
-    ) -> List[CarDB]:
+    ) -> list[CarDB]:
         """Demonstrates transaction with commit and rollback."""
         try:
             cars = (
@@ -139,6 +141,6 @@ class CarRepository:
 
             self.session.commit()
             return cars
-        except Exception as error:
+        except Exception:
             self.session.rollback()
-            raise error
+            raise

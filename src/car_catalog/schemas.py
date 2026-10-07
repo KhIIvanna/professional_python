@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class CarCreate(BaseModel):
     make: str = Field(min_length=1, max_length=100)
     model: str = Field(min_length=1, max_length=100)
@@ -9,6 +10,7 @@ class CarCreate(BaseModel):
     vin: str | None = Field(default=None, max_length=17)
     manufacturer_id: int | None = Field(default=None, gt=0)
 
+
 class CarUpdate(BaseModel):
     make: str | None = Field(default=None, min_length=1, max_length=100)
     model: str | None = Field(default=None, min_length=1, max_length=100)
@@ -17,6 +19,7 @@ class CarUpdate(BaseModel):
     mileage: int | None = Field(default=None, ge=0)
     vin: str | None = Field(default=None, max_length=17)
     manufacturer_id: int | None = Field(default=None, gt=0)
+
 
 class CarResponse(BaseModel):
     id: int
@@ -28,6 +31,4 @@ class CarResponse(BaseModel):
     vin: str | None
     manufacturer_id: int | None
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}

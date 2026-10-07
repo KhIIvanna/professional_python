@@ -11,3 +11,11 @@ build/
 data/
 cars_large.csv
 cars.db
+.env
+generate_data.py
+logs/
+data/
+htmlcov/
+output/
+.mypy_cache
+.pytest_cache

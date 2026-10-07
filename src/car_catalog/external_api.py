@@ -1,5 +1,7 @@
 import asyncio
+
 import httpx
+
 
 async def fetch_one_car(
     client: httpx.AsyncClient,
@@ -27,11 +29,7 @@ async def fetch_group_of_cars(base_url: str, car_ids: list[int]) -> list[dict]:
     async with httpx.AsyncClient(timeout=5.0) as client:
         tasks = [
             asyncio.create_task(
-                fetch_one_car(
-                    client,
-                    semaphore,
-                    f"{base_url}/cars/{car_id}"
-                )
+                fetch_one_car(client, semaphore, f"{base_url}/cars/{car_id}")
             )
             for car_id in car_ids
         ]

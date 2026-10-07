@@ -1,12 +1,17 @@
-from typing import Generator
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from collections.abc import Generator
 
-DATABASE_URL = "sqlite:///cars.db"
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
+from src.car_catalog.config import get_settings
+
+settings = get_settings()
 
 engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    settings.database_url,
+    connect_args={"check_same_thread": False}
+    if settings.database_url.startswith("sqlite")
+    else {},
     echo=False,
 )
 
